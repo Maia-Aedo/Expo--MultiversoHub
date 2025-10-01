@@ -16,7 +16,7 @@ export async function fetchPersonajes(page: number = 1): Promise<Personaje[]> {
     }
 }
 
-export async function getPersonaje(id: number): Promise<Personaje | null> {
+export async function getPersonajeId(id: number): Promise<Personaje | null> {
     try {
         const response = await fetch(`${API_URL}/character/${id}`);
         if (!response.ok) {
