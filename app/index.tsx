@@ -3,6 +3,7 @@ import { usePersonajes } from "../src/hooks/usePersonajes";
 import { Link } from "expo-router";
 
 export default function CharacterList() {
+    // Hook de carga de personajes
     const { personajes, loading } = usePersonajes();
 
     // Spinner
