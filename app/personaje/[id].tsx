@@ -9,7 +9,7 @@ import { getPersonajeId } from "../../src/api/personajes";
 import { Personaje } from "../../src/models/personaje.interface";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
-export default function CharacterDetail() {
+export default function DetallesPersonajes() {
     const { id } = useLocalSearchParams(); // obtenemos el ID del personaje
     const [character, setCharacter] = useState<Personaje | null>(null);
     const [loading, setLoading] = useState(true);
