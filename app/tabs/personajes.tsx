@@ -1,6 +1,7 @@
 import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 import { usePersonajes } from "../../src/hooks/usePersonajes";
 import { Link } from "expo-router";
+import CardPersonaje from "../../src/components/CardPersonaje";
 
 export default function ListadoPersonajes() {
     // Hook de carga de personajes
@@ -19,12 +20,8 @@ export default function ListadoPersonajes() {
             renderItem={({ item }) => (
                 // Al tocar un personaje, navega a detalles
                 <Link href={`/personaje/${item.id}`} asChild>
-                    <TouchableOpacity style={{ flexDirection: "row", padding: 10, alignItems: "center" }}>
-                        <Image source={{ uri: item.image }} style={{ width: 60, height: 60, borderRadius: 30 }} />
-                        <View style={{ marginLeft: 10 }}>
-                            <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item.name}</Text>
-                            <Text>{item.species} - {item.status}</Text>
-                        </View>
+                    <TouchableOpacity>
+                        <CardPersonaje personaje={item} />
                     </TouchableOpacity>
                 </Link>
             )}
