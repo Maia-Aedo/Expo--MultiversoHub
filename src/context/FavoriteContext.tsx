@@ -1,10 +1,9 @@
-// src/context/FavoriteContext.tsx
 import React, { createContext, useReducer, useEffect, useCallback, useContext, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PersonajeCard } from "../models/personaje-card.interface";
 
 interface State {
-    favorites: PersonajeCard[];
+    favoritos: PersonajeCard[];
     loading: boolean;
 }
 
@@ -23,17 +22,23 @@ interface FavoriteContextProps {
 
 const STORAGE_KEY = "@favorites_v1";
 
-const initialState: State = { favorites: [], loading: true };
+const initialState: State = { favoritos: [], loading: true };
+
+/**
+ * @description Definimos un contexto GLOBAL para manipular la lista de favoritos sin pasar las props manualmente ente components.
+ * useReducer para acciones de favoritos.
+ * Guarda los favoritos en localStorage.
+*/
 
 function reducer(state: State, action: Action): State {
     switch (action.type) {
         case "SET_FAVORITES":
-            return { ...state, favorites: action.payload, loading: false };
+            return { ...state, favoritos: action.payload, loading: false };
         case "ADD_FAVORITE":
-            if (state.favorites.some((f) => f.id === action.payload.id)) return state;
-            return { ...state, favorites: [action.payload, ...state.favorites] };
+            if (state.favoritos.some((f) => f.id === action.payload.id)) return state;
+            return { ...state, favoritos: [action.payload, ...state.favoritos] };
         case "REMOVE_FAVORITE":
-            return { ...state, favorites: state.favorites.filter((f) => f.id !== action.payload) };
+            return { ...state, favoritos: state.favoritos.filter((f) => f.id !== action.payload) };
         case "SET_LOADING":
             return { ...state, loading: action.payload };
         default:
@@ -43,6 +48,7 @@ function reducer(state: State, action: Action): State {
 
 const FavoriteContext = createContext<FavoriteContextProps | undefined>(undefined);
 
+// Con el provider cualquier componente dentro puede acceder al contexto
 export const FavoriteProvider = ({ children }: { children: ReactNode }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -68,23 +74,23 @@ export const FavoriteProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const save = async () => {
             try {
-                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state.favorites));
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state.favoritos));
             } catch (err) {
                 console.warn("Error guardando favoritos:", err);
             }
         };
         if (!state.loading) save();
-    }, [state.favorites, state.loading]);
+    }, [state.favoritos, state.loading]);
 
     const addFavorite = useCallback((c: PersonajeCard) => dispatch({ type: "ADD_FAVORITE", payload: c }), []);
     const removeFavorite = useCallback((id: number) => dispatch({ type: "REMOVE_FAVORITE", payload: id }), []);
     const toggleFavorite = useCallback(
         (c: PersonajeCard) => {
-            const exists = state.favorites.some((f) => f.id === c.id);
+            const exists = state.favoritos.some((f) => f.id === c.id);
             if (exists) dispatch({ type: "REMOVE_FAVORITE", payload: c.id });
             else dispatch({ type: "ADD_FAVORITE", payload: c });
         },
-        [state.favorites]
+        [state.favoritos]
     );
 
     return (

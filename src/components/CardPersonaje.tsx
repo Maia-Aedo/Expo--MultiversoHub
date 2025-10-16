@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from '@expo/vector-icons'
 import { useFavorites } from "../context/FavoriteContext";
 import { PersonajeCard } from "../models/personaje-card.interface";
 
@@ -9,7 +10,7 @@ interface Props {
 
 export default function CardPersonaje({ personaje }: Props) {
     const { state, toggleFavorite } = useFavorites();
-    const isFav = state.favorites.some((f) => f.id === personaje.id);
+    const isFav = state.favoritos.some((f) => f.id === personaje.id);
 
     return (
         <View style={styles.card}>
@@ -19,14 +20,24 @@ export default function CardPersonaje({ personaje }: Props) {
                 <Text style={styles.meta}>{personaje.species} - {personaje.status}</Text>
             </View>
             <TouchableOpacity onPress={() => toggleFavorite(personaje)} style={styles.favBtn}>
-                <Text style={{ fontSize: 18 }}>{isFav ? "★" : "☆"}</Text>
+                <Ionicons
+                    name={ isFav? 'heart': 'heart-outline' }
+                    size={22}
+                    color={ isFav ? 'red' : '#999' }
+                />
             </TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    card: { flexDirection: "row", alignItems: "center", padding: 8, borderBottomWidth: 1, borderColor: "#eee" },
+    card: { 
+        flexDirection: "row", 
+        alignItems: "center", 
+        padding: 8, 
+        borderBottomWidth: 1, 
+        borderColor: "#eee" 
+    },
     image: { width: 64, height: 64, borderRadius: 8 },
     name: { fontWeight: "700" },
     meta: { color: "#666", fontSize: 12 },

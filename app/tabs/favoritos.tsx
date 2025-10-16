@@ -5,7 +5,6 @@ import { PersonajeCard } from "../../src/models/personaje-card.interface";
 
 export default function FavoritosScreen() {
     const { state, removeFavorite } = useFavorites();
-
     if (state.loading)
         return (
             <View style={styles.center}>
@@ -13,7 +12,7 @@ export default function FavoritosScreen() {
             </View>
         );
 
-    if (state.favorites.length === 0)
+    if (state.favoritos.length === 0)
         return (
             <View style={styles.center}>
                 <Text>No tenés favoritos aún.</Text>
@@ -33,7 +32,7 @@ export default function FavoritosScreen() {
         </View>
     );
 
-    return <FlatList data={state.favorites} keyExtractor={(i) => i.id.toString()} renderItem={renderItem} contentContainerStyle={{ padding: 12 }} />;
+    return <FlatList data={state.favoritos} keyExtractor={(i) => i.id.toString()} renderItem={renderItem} contentContainerStyle={{ padding: 12 }} />;
 }
 
 const styles = StyleSheet.create({
