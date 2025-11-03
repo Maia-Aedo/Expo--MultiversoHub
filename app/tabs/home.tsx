@@ -2,17 +2,22 @@ import React, { useMemo, useState } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePersonajes, Filter } from "../../src/hooks/usePersonajes";
 import { useFavorites } from "../../src/context/FavoriteContext";
 import type { Personaje } from "../../src/models/personaje.interface";
 import type { PersonajeCard } from "../../src/models/personaje-card.interface";
+import { logEvent } from "../../src/utils/telemetry";
 
 
 export default function HomeScreen() {
-    const navigation = useNavigation();
+    // const navigation = useNavigation();
+    const router = useRouter();
     const { personajes, loading } = usePersonajes(1);
     const { state: favState, toggleFavorite } = useFavorites();
+    const insets = useSafeAreaInsets();
 
     const [filter, setFilter] = useState<Filter>("ALL");
 
@@ -42,8 +47,8 @@ export default function HomeScreen() {
     }, [personajes, filter, favoritoIds]);
 
     const onPressItem = (item: Personaje) => {
-        // Navegar a detalle
-        // navigation.navigate("DetallesPersonajes" as never, { id: item.id } as never);
+        // USAR router.push PARA NAVEGAR
+        router.push(`/personaje/${item.id}`);
     };
 
     const onToggleFavorite = (p: Personaje) => {
@@ -59,6 +64,8 @@ export default function HomeScreen() {
 
     const renderItem = ({ item }: { item: Personaje }) => {
         const isFav = favoritoIds.has(item.id);
+        const isDead = item.status.toLowerCase() === 'dead';
+
         return (
             // uso Pressable para manejar mejor la interacción y permitir el corazón independiente
             <Pressable onPress={() => onPressItem(item)} style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}>
@@ -81,9 +88,10 @@ export default function HomeScreen() {
                     onPress={(ev) => {
                         ev.stopPropagation?.(); // por seguridad (algunas versiones)
                         onToggleFavorite(item);
+                        logEvent('FAVORITE', { id: item.id, action: isFav ? 'removed' : 'added' });
                     }}
                 >
-                    <Ionicons name={isFav ? "heart" : "heart-outline"} size={22} />
+                    <Ionicons name={isFav ? "heart" : "heart-outline"} size={22} color={isFav ? '#dc3545' : '#ccc'} />
                 </TouchableOpacity>
             </Pressable>
         );
@@ -92,14 +100,14 @@ export default function HomeScreen() {
     if (loading || favState.loading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#61dafb" />
             </View>
         );
     }
 
+    //*usamos SafeAreaView para poder ocular la barra superior*
     return (
-        <View style={styles.container}>
-            {/* Resumen */}
+        <SafeAreaView style={styles.container}>             
             <View style={styles.summary}>
                 <View style={styles.summaryCard}>
                     <Text style={styles.summaryTitle}>Total</Text>
@@ -118,7 +126,10 @@ export default function HomeScreen() {
                     <TouchableOpacity
                         key={f}
                         style={[styles.chip, filter === f ? styles.chipActive : undefined]}
-                        onPress={() => setFilter(f)}
+                        onPress={() => {
+                            setFilter(f);
+                            logEvent('FILTER', { newFilter: f });
+                        }}
                     >
                         <Text style={filter === f ? styles.chipTextActive : styles.chipText}>
                             {f === "ALL" ? "Todos" : f === "ALIVE" ? "Vivos" : f === "UNKNOWN" ? "Desconocidos" : "Favoritos"}
@@ -132,32 +143,45 @@ export default function HomeScreen() {
                 data={filtered}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
-                contentContainerStyle={styles.list}
+
+                contentContainerStyle={{
+                    paddingHorizontal: 0,
+                    paddingBottom: insets.bottom + 80 //  80 para la barra de pestañas + un margen extra
+                }}
+
+                showsVerticalScrollIndicator={false} //  OCULTA SCROLLBAR
                 ListEmptyComponent={
                     <View style={styles.center}>
-                        <Text>No hay personajes para mostrar</Text>
+                        <Text style={styles.emptyText}>No hay personajes para mostrar con este filtro.</Text>
                     </View>
                 }
             />
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+    container: {
+        flex: 1,
+        paddingHorizontal: 16,
+        backgroundColor: "#262626" // fondo oscuro
+    },
     center: { flex: 1, justifyContent: "center", alignItems: "center" },
+    emptyText: { color: '#ccc' },
 
     summary: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
     summaryCard: {
         flex: 1,
         marginHorizontal: 6,
         padding: 12,
-        borderRadius: 8,
-        backgroundColor: "#f3f3f3",
+        borderRadius: 10,
+        backgroundColor: "#3a3a3a",
         alignItems: "center",
+        borderLeftWidth: 3,
+        borderColor: '#61dafb',
     },
-    summaryTitle: { fontSize: 14, color: "#666" },
-    summaryNumber: { fontSize: 22, fontWeight: "700" },
+    summaryTitle: { fontSize: 14, color: "#ccc" },
+    summaryNumber: { fontSize: 22, fontWeight: "700", color: "#fff" },
 
     filters: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginVertical: 12 },
     chip: {
@@ -165,42 +189,50 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: "#ddd",
-        marginRight: 8,
+        borderColor: "#555",
     },
     chipActive: {
-        backgroundColor: "#222",
-        borderColor: "#222",
+        backgroundColor: "#61dafb",
+        borderColor: "#61dafb",
     },
-    chipText: { color: "#333" },
-    chipTextActive: { color: "#fff" },
+    chipText: { color: "#ccc" },
+    chipTextActive: { color: "#262626", fontWeight: 'bold' },
 
-    list: { paddingBottom: 80 },
+    // list: { paddingBottom: 80 },
 
     item: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 10,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderColor: "#eee",
+        paddingVertical: 15,
+        paddingHorizontal: 10,
+        marginVertical: 4,
+        borderRadius: 10,
+        backgroundColor: '#3a3a3a',
+        borderLeftWidth: 3,
+        borderColor: '#555',
+        elevation: 2,
     },
-    itemPressed: { opacity: 0.9 },
+    itemDead: {
+        opacity: 0.6,
+        borderColor: '#dc3545',
+    },
+    itemPressed: { opacity: 0.8 },
 
-    avatar: { width: 48, height: 48, borderRadius: 24, marginRight: 12 },
+    avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 15 },
     avatarPlaceholder: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        marginRight: 12,
-        backgroundColor: "#ddd",
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 15,
+        backgroundColor: "#555",
         justifyContent: "center",
         alignItems: "center",
     },
-    avatarText: { fontWeight: "700" },
+    avatarText: { fontWeight: "700", color: '#fff' },
 
     itemBody: { flex: 1 },
-    name: { fontSize: 16, fontWeight: "600" },
-    status: { color: "#666" },
+    name: { fontSize: 16, fontWeight: "600", color: '#fff' },
+    status: { color: "#ccc" },
     extra: { color: "#888", fontSize: 12 },
 
     favoriteBtn: { paddingHorizontal: 8, paddingVertical: 4 },

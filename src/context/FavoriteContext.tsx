@@ -1,6 +1,7 @@
 import React, { createContext, useReducer, useEffect, useCallback, useContext, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PersonajeCard } from "../models/personaje-card.interface";
+import { logEvent } from "../utils/telemetry";
 
 interface State {
     favoritos: PersonajeCard[];
@@ -84,11 +85,19 @@ export const FavoriteProvider = ({ children }: { children: ReactNode }) => {
 
     const addFavorite = useCallback((c: PersonajeCard) => dispatch({ type: "ADD_FAVORITE", payload: c }), []);
     const removeFavorite = useCallback((id: number) => dispatch({ type: "REMOVE_FAVORITE", payload: id }), []);
+    
     const toggleFavorite = useCallback(
         (c: PersonajeCard) => {
             const exists = state.favoritos.some((f) => f.id === c.id);
             if (exists) dispatch({ type: "REMOVE_FAVORITE", payload: c.id });
             else dispatch({ type: "ADD_FAVORITE", payload: c });
+            if (exists) {
+                dispatch({ type: "REMOVE_FAVORITE", payload: c.id });
+                logEvent('FAVORITE', { id: c.id, action: 'removed' }); 
+            } else {
+                dispatch({ type: "ADD_FAVORITE", payload: c });
+                logEvent('FAVORITE', { id: c.id, action: 'added' }); 
+            }
         },
         [state.favoritos]
     );
