@@ -70,5 +70,5 @@ Para iniciar el proyecto en tu máquina local:
 
 ## 🧑‍💻 6. Contribuidores
 
-* **[AED MAIA]**
+* **[AEDO MAIA]**
 * **[ULLOA SOTO MELINA]**
