@@ -23,3 +23,5 @@ export function usePersonajes(page: number = 1) {
 
     return { personajes, loading };
 }
+
+export type Filter = 'ALL' | 'ALIVE' | 'UNKNOWN' | 'FAVORITES';
