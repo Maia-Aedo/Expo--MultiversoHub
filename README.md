@@ -10,6 +10,12 @@
 El proyecto fue desarrollado utilizando **React Native con Expo Router** para una navegación moderna y limpia (Tabs y Stacks), cumpliendo con todos los requerimientos de telemetría y configuración solicitados.
 
 ---
+## 🔗 1.1. Documentación Completa del Proyecto
+
+Aquí se encuentra la documentación detallada del trabajo, casos de uso, decisiones técnicas y evidencias del desarrollo:
+
+👉 Documentación del Proyecto: [https://docs.google.com/document/d/10d5JIKT7dn2mAzYa2U0enoxdvjcUewPdTinyTWa0d6Q/edit?usp=sharing]
+---
 
 ## 🛠️ 2. Tecnologías Utilizadas
 
