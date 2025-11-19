@@ -14,7 +14,7 @@ El proyecto fue desarrollado utilizando **React Native con Expo Router** para un
 
 Aquí se encuentra la documentación detallada del trabajo, casos de uso, decisiones técnicas y evidencias del desarrollo:
 
-👉 Documentación del Proyecto: [https://docs.google.com/document/d/10d5JIKT7dn2mAzYa2U0enoxdvjcUewPdTinyTWa0d6Q/edit?usp=sharing]
+👉 https://docs.google.com/document/d/10d5JIKT7dn2mAzYa2U0enoxdvjcUewPdTinyTWa0d6Q/edit?usp=sharing
 ---
 
 ## 🛠️ 2. Tecnologías Utilizadas
